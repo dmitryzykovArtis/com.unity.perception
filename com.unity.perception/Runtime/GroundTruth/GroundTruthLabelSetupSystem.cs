@@ -4,6 +4,8 @@ using Unity.Entities;
 
 namespace UnityEngine.Perception.GroundTruth
 {
+    
+    
     struct IdAssignmentParameters : IComponentData
     {
         public uint idStart;
@@ -14,6 +16,7 @@ namespace UnityEngine.Perception.GroundTruth
     /// </summary>
     public class GroundTruthLabelSetupSystem : ComponentSystem
     {
+        static Dictionary<uint, float[]> position_dictionary = new Dictionary<uint, float[]>();
         List<IGroundTruthGenerator> m_ActiveGenerators = new List<IGroundTruthGenerator>();
         ThreadLocal<MaterialPropertyBlock> m_MaterialPropertyBlocks = new ThreadLocal<MaterialPropertyBlock>();
         int m_CurrentObjectIndex = -1;
@@ -49,6 +52,10 @@ namespace UnityEngine.Perception.GroundTruth
                     m_MaterialPropertyBlocks.Value = new MaterialPropertyBlock();
 
                 InitGameObjectRecursive(gameObject, m_MaterialPropertyBlocks.Value, labeling, instanceId);
+                Vector3 p_v = gameObject.transform.position;
+                Quaternion r_v = gameObject.transform.rotation;
+                float [] position = new float[] {p_v.x, p_v.y, p_v.z, r_v.x, r_v.y, r_v.z,};
+                position_dictionary.Add(instanceId, position);
                 EntityManager.AddComponentData(e, new GroundTruthInfo
                 {
                     instanceId = instanceId
@@ -124,6 +131,10 @@ namespace UnityEngine.Perception.GroundTruth
         internal void RefreshLabeling(Entity labelingEntity)
         {
             EntityManager.RemoveComponent<GroundTruthInfo>(labelingEntity);
+        }
+
+        public static float[] GetPositionForId(uint instanceId){
+            return position_dictionary[instanceId];
         }
     }
 }

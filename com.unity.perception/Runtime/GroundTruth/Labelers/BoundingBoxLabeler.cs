@@ -33,6 +33,12 @@ namespace UnityEngine.Perception.GroundTruth
             public float y;
             public float width;
             public float height;
+            public float object_x;
+            public float object_y;
+            public float object_z;
+            public float object_angle_x;
+            public float object_angle_y;
+            public float object_angle_z;
         }
 
         static ProfilerMarker s_BoundingBoxCallback = new ProfilerMarker("OnBoundingBoxesReceived");
@@ -128,7 +134,9 @@ namespace UnityEngine.Perception.GroundTruth
                     var objectInfo = renderedObjectInfos[i];
                     if (!idLabelConfig.TryGetLabelEntryFromInstanceId(objectInfo.instanceId, out var labelEntry))
                         continue;
-
+                    
+                    
+                    float[] position = GroundTruthLabelSetupSystem.GetPositionForId(objectInfo.instanceId);
                     m_BoundingBoxValues.Add(new BoundingBoxValue
                     {
                         label_id = labelEntry.id,
@@ -138,6 +146,12 @@ namespace UnityEngine.Perception.GroundTruth
                         y = objectInfo.boundingBox.y,
                         width = objectInfo.boundingBox.width,
                         height = objectInfo.boundingBox.height,
+                        object_x = position[0],
+                        object_y = position[1],
+                        object_z = position[2],
+                        object_angle_x = position[3],
+                        object_angle_y = position[4],
+                        object_angle_z = position[5],
                     });
                 }
 
